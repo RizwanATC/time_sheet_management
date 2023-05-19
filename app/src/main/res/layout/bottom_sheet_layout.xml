@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- EditText -->
+    <TextView
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:text="Time Sheet Entry"
+        android:id="@+id/tv_time_sheet_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Project -->
+    <EditText
+        android:id="@+id/editTextProject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Project" />
+
+    <!-- Task -->
+    <EditText
+        android:id="@+id/editTextTask"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Task" />
+
+    <!-- Date From -->
+    <TextView
+        android:id="@+id/editTextDateFrom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Date From" />
+
+    <!-- Date To -->
+    <TextView
+        android:id="@+id/editTextDateTo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Date To" />
+
+    <!-- Status -->
+    <Spinner
+        android:id="@+id/spinnerStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Status" />
+
+    <!-- Assign To -->
+    <EditText
+        android:id="@+id/editTextAssignTo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Assign To" />
+
+    <!-- Save and Close Buttons -->
+    <LinearLayout
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_marginRight="10dp"
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save" />
+
+        <Button
+            android:layout_marginLeft="10dp"
+            android:id="@+id/close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Close" />
+    </LinearLayout>
+
+</LinearLayout>
