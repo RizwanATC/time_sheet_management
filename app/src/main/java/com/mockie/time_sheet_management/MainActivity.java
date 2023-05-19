@@ -8,22 +8,63 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    private ListView listView;
+    private CardAdapter cardAdapter;
+    private List<CardItem> cardItems;
+
     private Button buttonCreate;
+
+    private Button searchButton;
+    private EditText searchEditText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        listView = findViewById(R.id.listView);
+        cardItems = new ArrayList<>();
+        cardAdapter = new CardAdapter(this, cardItems);
+
+        // Add some example card items
+        cardItems.add(new CardItem("Project A", "Task 1", "John Doe", "2023-05-20", "2023-05-22", "In Progress"));
+        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
+        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
+        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
+        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
+        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
+
+
+        // Set the adapter to the ListView
+        listView.setAdapter(cardAdapter);
+        searchEditText = findViewById(R.id.editTextSearch);
+        searchButton = findViewById(R.id.buttonSearch);
+
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String searchText = searchEditText.getText().toString().trim();
+                performSearch(searchText);
+            }
+        });
+
+
+
 
         buttonCreate = findViewById(R.id.buttonCreate);
 
@@ -34,6 +75,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void performSearch(String searchText) {
+        List<CardItem> searchResults = new ArrayList<>();
+        for (CardItem cardItem : cardItems) {
+            if (cardItem.getProject().toLowerCase().contains(searchText.toLowerCase()) ||
+                    cardItem.getProject().toLowerCase().contains(searchText.toLowerCase())) {
+                searchResults.add(cardItem);
+            }
+        }
+
+        // Update the adapter with search results
+        cardAdapter.updateData(searchResults);
+    }
+
 
     private void showBottomSheet() {
         View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_layout, null);

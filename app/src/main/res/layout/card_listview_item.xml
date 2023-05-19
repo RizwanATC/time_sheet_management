@@ -1,0 +1,82 @@
+<!-- card_listview_item.xml -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="#BCC6CC">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="@android:color/white">
+
+        <TextView
+            android:id="@+id/_project"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Task Name -->
+        <TextView
+            android:id="@+id/_taskName"
+            android:layout_below="@id/_project"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Assigned To -->
+        <TextView
+            android:id="@+id/_taskAssign"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/_taskName"
+            android:layout_marginTop="8dp" />
+
+        <!-- From -->
+        <TextView
+            android:id="@+id/_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/_taskAssign"
+            android:layout_marginTop="8dp" />
+
+        <!-- To -->
+        <TextView
+            android:id="@+id/_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/_from"
+            android:layout_marginTop="8dp" />
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/_to"
+            android:layout_marginTop="8dp" />
+
+        <!-- Edit Button -->
+        <Button
+            android:id="@+id/_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="8dp"
+            android:text="Edit" />
+
+        <!-- Delete Button -->
+        <Button
+            android:id="@+id/_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/_edit"
+            android:text="Delete" />
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>
