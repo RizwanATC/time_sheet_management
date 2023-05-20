@@ -7,11 +7,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -62,42 +64,16 @@ public class MainActivity extends AppCompatActivity {
         originalData = new ArrayList<>(); // Initialize the original data list
         cardAdapter = new CardAdapter(this, cardItems, originalData); // Pass the original data list to the adapter
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("Project");
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        fetchFIreBaseData();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                cardItems.clear(); // Clear the existing cardItems list
-                originalData.clear(); // Clear the existing originalData list
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                CardItem selectedCardItem = cardItems.get(position);
+                String cardItemId = selectedCardItem.getId();
+                selectedCardItem.setId(String.valueOf(position));
 
-                // Loop through the children of the "Project" node
-                for (DataSnapshot projectSnapshot : dataSnapshot.getChildren()) {
-                    // Exclude the unique ID from being retrieved as the project name
-                    if (projectSnapshot.getKey() != null && !projectSnapshot.getKey().isEmpty()) {
-                        // Retrieve other properties of the project
-                        String projectName = projectSnapshot.child("nameproject").getValue(String.class);
-                        String assignTo = projectSnapshot.child("assignto").getValue(String.class);
-                        String dateFrom = projectSnapshot.child("datefrom").getValue(String.class);
-                        String dateTo = projectSnapshot.child("dateto").getValue(String.class);
-                        String status = projectSnapshot.child("status").getValue(String.class);
-                        String taskName = projectSnapshot.child("taskName").getValue(String.class);
 
-                        CardItem newItem = new CardItem(projectName, taskName, assignTo, dateFrom, dateTo, status);
-
-                        // Add the new item to the cardItems and originalData lists
-                        cardItems.add(newItem);
-                        originalData.add(newItem);
-
-                        // Do something with the retrieved data
-                        // ...
-                    }
-                }
-                cardAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Handle any errors that occur
-                // ...
             }
         });
 
@@ -122,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 String searchText = s.toString().trim();
                 if (searchText.isEmpty()) {
                     // If the search text is empty, reset the data to show the full list
-                    cardAdapter.resetData();
+                    fetchFIreBaseData();
                 } else {
                     performSearch(searchText);
                 }
@@ -134,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String searchText = searchEditText.getText().toString().trim();
                 if (searchText.isEmpty()) {
-                    resetData(); // Reset the adapter data to the original list
+                    fetchFIreBaseData(); // Reset the adapter data to the original list
                 } else {
                     performSearch(searchText);
                 }
@@ -167,9 +143,13 @@ public class MainActivity extends AppCompatActivity {
     private void showBottomSheet() {
         View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_layout, null);
 
+
+
         TextView editText = bottomSheetView.findViewById(R.id.tv_time_sheet_title);
         EditText editTextProject = bottomSheetView.findViewById(R.id.editTextProject);
         EditText editTextTask = bottomSheetView.findViewById(R.id.editTextTask);
+        LinearLayout ly_from = bottomSheetView.findViewById(R.id.lyFrom);
+        LinearLayout ly_to = bottomSheetView.findViewById(R.id.lyTo);
         TextView editTextDateFrom = bottomSheetView.findViewById(R.id.editTextDateFrom);
         TextView editTextDateTo = bottomSheetView.findViewById(R.id.editTextDateTo);
         Spinner sp_status = bottomSheetView.findViewById(R.id.spinnerStatus);
@@ -182,14 +162,14 @@ public class MainActivity extends AppCompatActivity {
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
 
-        editTextDateFrom.setOnClickListener(new View.OnClickListener() {
+        ly_from.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDatePicker(editTextDateFrom);
             }
         });
 
-        editTextDateTo.setOnClickListener(new View.OnClickListener() {
+        ly_to.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDatePicker(editTextDateTo);
@@ -268,34 +248,41 @@ public class MainActivity extends AppCompatActivity {
         originalData.clear();
 
         // Retrieve the original data from the server
+
+    }
+
+    public void fetchFIreBaseData(){
+        databaseReference = FirebaseDatabase.getInstance().getReference("Project");
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot projectSnapshot : dataSnapshot.getChildren()) {
-                        // Exclude the unique ID from being retrieved as the project name
-                        if (projectSnapshot.getKey() != null && !projectSnapshot.getKey().isEmpty()) {
-                            // Retrieve other properties of the project
-                            String projectName = projectSnapshot.child("nameproject").getValue(String.class);
-                            String assignTo = projectSnapshot.child("assignto").getValue(String.class);
-                            String dateFrom = projectSnapshot.child("datefrom").getValue(String.class);
-                            String dateTo = projectSnapshot.child("dateto").getValue(String.class);
-                            String status = projectSnapshot.child("status").getValue(String.class);
-                            String taskName = projectSnapshot.child("taskName").getValue(String.class);
+                cardItems.clear(); // Clear the existing cardItems list
+                originalData.clear(); // Clear the existing originalData list
 
-                            CardItem newItem = new CardItem(projectName, taskName, assignTo, dateFrom, dateTo, status);
+                // Loop through the children of the "Project" node
+                for (DataSnapshot projectSnapshot : dataSnapshot.getChildren()) {
+                    // Exclude the unique ID from being retrieved as the project name
+                    if (projectSnapshot.getKey() != null && !projectSnapshot.getKey().isEmpty()) {
+                        // Retrieve other properties of the project
+                        String projectName = projectSnapshot.child("nameproject").getValue(String.class);
+                        String assignTo = projectSnapshot.child("assignto").getValue(String.class);
+                        String dateFrom = projectSnapshot.child("datefrom").getValue(String.class);
+                        String dateTo = projectSnapshot.child("dateto").getValue(String.class);
+                        String status = projectSnapshot.child("status").getValue(String.class);
+                        String taskName = projectSnapshot.child("taskName").getValue(String.class);
 
-                            // Add the new item to the cardItems and originalData lists
-                            cardItems.add(newItem);
-                            originalData.add(newItem);
+                        CardItem newItem = new CardItem(projectName, taskName, assignTo, dateFrom, dateTo, status);
 
-                            // Do something with the retrieved data
-                            // ...
-                        }
+                        // Add the new item to the cardItems and originalData lists
+                        cardItems.add(newItem);
+                        originalData.add(newItem);
+
+                        // Do something with the retrieved data
+                        // ...
                     }
-
-                    cardAdapter.notifyDataSetChanged();
                 }
+
+                cardAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -306,3 +293,4 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 }
+

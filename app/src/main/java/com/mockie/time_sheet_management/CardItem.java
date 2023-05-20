@@ -1,6 +1,7 @@
 package com.mockie.time_sheet_management;
 
 public class CardItem {
+    private String id; // Unique ID of the card item
     private String projectName;
     private String taskName;
     private String assignee;
@@ -8,7 +9,10 @@ public class CardItem {
     private String endDate;
     private String status;
 
-    // Constructor
+    public CardItem() {
+        // Default constructor required for Firebase
+    }
+
     public CardItem(String projectName, String taskName, String assignee, String startDate, String endDate, String status) {
         this.projectName = projectName;
         this.taskName = taskName;
@@ -18,8 +22,13 @@ public class CardItem {
         this.status = status;
     }
 
-    // Getters and setters (if needed)
-    // ...
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getProjectName() {
         return projectName;
