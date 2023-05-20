@@ -1,36 +1,56 @@
 package com.mockie.time_sheet_management;
 
 import android.app.DatePickerDialog;
+import android.media.Image;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-
 
     private ListView listView;
     private CardAdapter cardAdapter;
     private List<CardItem> cardItems;
+    private List<CardItem> originalData; // Store the original data for resetting
 
-    private Button buttonCreate;
+    private ImageButton buttonCreate;
 
-    private Button searchButton;
+    private ImageButton searchButton;
     private EditText searchEditText;
 
+    FirebaseDatabase db;
+    DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,32 +59,87 @@ public class MainActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.listView);
         cardItems = new ArrayList<>();
-        cardAdapter = new CardAdapter(this, cardItems);
+        originalData = new ArrayList<>(); // Initialize the original data list
+        cardAdapter = new CardAdapter(this, cardItems, originalData); // Pass the original data list to the adapter
 
-        // Add some example card items
-        cardItems.add(new CardItem("Project A", "Task 1", "John Doe", "2023-05-20", "2023-05-22", "In Progress"));
-        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
-        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
-        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
-        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
-        cardItems.add(new CardItem("Project B", "Task 2", "Jane Smith", "2023-05-21", "2023-05-23", "Completed"));
+        databaseReference = FirebaseDatabase.getInstance().getReference("Project");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                cardItems.clear(); // Clear the existing cardItems list
+                originalData.clear(); // Clear the existing originalData list
 
+                // Loop through the children of the "Project" node
+                for (DataSnapshot projectSnapshot : dataSnapshot.getChildren()) {
+                    // Exclude the unique ID from being retrieved as the project name
+                    if (projectSnapshot.getKey() != null && !projectSnapshot.getKey().isEmpty()) {
+                        // Retrieve other properties of the project
+                        String projectName = projectSnapshot.child("nameproject").getValue(String.class);
+                        String assignTo = projectSnapshot.child("assignto").getValue(String.class);
+                        String dateFrom = projectSnapshot.child("datefrom").getValue(String.class);
+                        String dateTo = projectSnapshot.child("dateto").getValue(String.class);
+                        String status = projectSnapshot.child("status").getValue(String.class);
+                        String taskName = projectSnapshot.child("taskName").getValue(String.class);
 
-        // Set the adapter to the ListView
+                        CardItem newItem = new CardItem(projectName, taskName, assignTo, dateFrom, dateTo, status);
+
+                        // Add the new item to the cardItems and originalData lists
+                        cardItems.add(newItem);
+                        originalData.add(newItem);
+
+                        // Do something with the retrieved data
+                        // ...
+                    }
+                }
+                cardAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle any errors that occur
+                // ...
+            }
+        });
+
         listView.setAdapter(cardAdapter);
+
         searchEditText = findViewById(R.id.editTextSearch);
         searchButton = findViewById(R.id.buttonSearch);
+
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed in this case
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Not needed in this case
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String searchText = s.toString().trim();
+                if (searchText.isEmpty()) {
+                    // If the search text is empty, reset the data to show the full list
+                    cardAdapter.resetData();
+                } else {
+                    performSearch(searchText);
+                }
+            }
+        });
 
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String searchText = searchEditText.getText().toString().trim();
-                performSearch(searchText);
+                if (searchText.isEmpty()) {
+                    resetData(); // Reset the adapter data to the original list
+                } else {
+                    performSearch(searchText);
+                }
             }
         });
-
-
-
 
         buttonCreate = findViewById(R.id.buttonCreate);
 
@@ -79,8 +154,8 @@ public class MainActivity extends AppCompatActivity {
     private void performSearch(String searchText) {
         List<CardItem> searchResults = new ArrayList<>();
         for (CardItem cardItem : cardItems) {
-            if (cardItem.getProject().toLowerCase().contains(searchText.toLowerCase()) ||
-                    cardItem.getProject().toLowerCase().contains(searchText.toLowerCase())) {
+            if (cardItem.getProjectName().toLowerCase().contains(searchText.toLowerCase()) ||
+                    cardItem.getTaskName().toLowerCase().contains(searchText.toLowerCase())) {
                 searchResults.add(cardItem);
             }
         }
@@ -88,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
         // Update the adapter with search results
         cardAdapter.updateData(searchResults);
     }
-
 
     private void showBottomSheet() {
         View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_layout, null);
@@ -130,15 +204,34 @@ public class MainActivity extends AppCompatActivity {
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String text = editText.getText().toString();
-                String project = editTextProject.getText().toString();
-                String task = editTextTask.getText().toString();
+                String projectName = editTextProject.getText().toString();
+                String taskName = editTextTask.getText().toString();
                 String dateFrom = editTextDateFrom.getText().toString();
                 String dateTo = editTextDateTo.getText().toString();
                 String status = sp_status.getSelectedItem().toString();
                 String assignTo = editTextAssignTo.getText().toString();
 
                 // Perform save operation with the retrieved values
+                if (!projectName.isEmpty() && !taskName.isEmpty() && !dateFrom.isEmpty() &&
+                        !dateTo.isEmpty() && !status.isEmpty() && !assignTo.isEmpty()) {
+                    Project project = new Project(projectName, taskName, dateFrom, dateTo, status, assignTo);
+                    db = FirebaseDatabase.getInstance();
+                    DatabaseReference reference = db.getReference("Project");
+
+                    String projectId = reference.push().getKey(); // Generate a unique ID for the project
+                    reference.child(projectId).setValue(project).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            editTextTask.setText("");
+                            editTextDateFrom.setText("");
+                            editTextDateTo.setText("");
+                            sp_status.setSelection(0);
+                            editTextAssignTo.setText("");
+                            Toast.makeText(MainActivity.this, "Successful", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
 
                 bottomSheetDialog.dismiss();
             }
@@ -169,4 +262,47 @@ public class MainActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
+    // Method to reset adapter data to the original data
+    public void resetData() {
+        cardItems.clear();
+        originalData.clear();
+
+        // Retrieve the original data from the server
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot projectSnapshot : dataSnapshot.getChildren()) {
+                        // Exclude the unique ID from being retrieved as the project name
+                        if (projectSnapshot.getKey() != null && !projectSnapshot.getKey().isEmpty()) {
+                            // Retrieve other properties of the project
+                            String projectName = projectSnapshot.child("nameproject").getValue(String.class);
+                            String assignTo = projectSnapshot.child("assignto").getValue(String.class);
+                            String dateFrom = projectSnapshot.child("datefrom").getValue(String.class);
+                            String dateTo = projectSnapshot.child("dateto").getValue(String.class);
+                            String status = projectSnapshot.child("status").getValue(String.class);
+                            String taskName = projectSnapshot.child("taskName").getValue(String.class);
+
+                            CardItem newItem = new CardItem(projectName, taskName, assignTo, dateFrom, dateTo, status);
+
+                            // Add the new item to the cardItems and originalData lists
+                            cardItems.add(newItem);
+                            originalData.add(newItem);
+
+                            // Do something with the retrieved data
+                            // ...
+                        }
+                    }
+
+                    cardAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle any errors that occur
+                // ...
+            }
+        });
+    }
 }

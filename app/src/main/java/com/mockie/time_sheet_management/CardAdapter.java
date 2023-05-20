@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -16,7 +15,7 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
     private List<CardItem> cardItems;
     private List<CardItem> originalData; // Original data before filtering
 
-    public CardAdapter(Context context, List<CardItem> cardItems) {
+    public CardAdapter(Context context, List<CardItem> cardItems, List<CardItem> originalData) {
         super(context, 0, cardItems);
         this.context = context;
         this.cardItems = cardItems;
@@ -41,11 +40,11 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
         TextView toTextView = convertView.findViewById(R.id._to);
         TextView statusTextView = convertView.findViewById(R.id._status);
 
-        projectTextView.setText(cardItem.getProject());
-        taskNameTextView.setText(cardItem.getTask());
-        taskAssignTextView.setText(cardItem.getAssignedTo());
-        fromTextView.setText(cardItem.getFrom());
-        toTextView.setText(cardItem.getTo());
+        projectTextView.setText(cardItem.getProjectName());
+        taskNameTextView.setText(cardItem.getTaskName());
+        taskAssignTextView.setText(cardItem.getAssignee());
+        fromTextView.setText(cardItem.getStartDate());
+        toTextView.setText(cardItem.getEndDate());
         statusTextView.setText(cardItem.getStatus());
 
         return convertView;
@@ -80,4 +79,3 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
         notifyDataSetChanged();
     }
 }
-

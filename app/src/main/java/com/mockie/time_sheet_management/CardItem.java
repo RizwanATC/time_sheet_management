@@ -1,43 +1,71 @@
 package com.mockie.time_sheet_management;
 
 public class CardItem {
-    private String project;
-    private String task;
-    private String assignedTo;
-    private String from;
-    private String to;
+    private String projectName;
+    private String taskName;
+    private String assignee;
+    private String startDate;
+    private String endDate;
     private String status;
 
-    public CardItem(String project, String task, String assignedTo, String from, String to, String status) {
-        this.project = project;
-        this.task = task;
-        this.assignedTo = assignedTo;
-        this.from = from;
-        this.to = to;
+    // Constructor
+    public CardItem(String projectName, String taskName, String assignee, String startDate, String endDate, String status) {
+        this.projectName = projectName;
+        this.taskName = taskName;
+        this.assignee = assignee;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.status = status;
     }
 
-    public String getProject() {
-        return project;
+    // Getters and setters (if needed)
+    // ...
+
+    public String getProjectName() {
+        return projectName;
     }
 
-    public String getTask() {
-        return task;
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
-    public String getAssignedTo() {
-        return assignedTo;
+    public String getTaskName() {
+        return taskName;
     }
 
-    public String getFrom() {
-        return from;
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 
-    public String getTo() {
-        return to;
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 
     public String getStatus() {
         return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
