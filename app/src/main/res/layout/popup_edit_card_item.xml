@@ -130,7 +130,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_drop_down" />
+                android:src="@drawable/dropdown" />
 
         </RelativeLayout>
 
