@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         listView = findViewById(R.id.listView);
         cardItems = new ArrayList<>();
         originalData = new ArrayList<>(); // Initialize the original data list
@@ -133,6 +134,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
+
+
+
+
+
+
 
     private void performSearch(String searchText) {
         List<CardItem> searchResults = new ArrayList<>();
