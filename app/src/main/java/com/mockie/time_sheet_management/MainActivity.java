@@ -1,12 +1,15 @@
 package com.mockie.time_sheet_management;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -31,6 +34,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     FirebaseDatabase db;
     DatabaseReference databaseReference;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,14 +161,71 @@ public class MainActivity extends AppCompatActivity {
         TextView editTextDateFrom = bottomSheetView.findViewById(R.id.editTextDateFrom);
         TextView editTextDateTo = bottomSheetView.findViewById(R.id.editTextDateTo);
         Spinner sp_status = bottomSheetView.findViewById(R.id.spinnerStatus);
-        EditText editTextAssignTo = bottomSheetView.findViewById(R.id.editTextAssignTo);
+        Spinner sp_user = bottomSheetView.findViewById(R.id.SpinnerUser);
 
         Button buttonSave = bottomSheetView.findViewById(R.id.save);
         Button buttonClose = bottomSheetView.findViewById(R.id.close);
+        ImageButton createUser = bottomSheetView.findViewById(R.id.createUser);
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
+
+        createUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // Replace "YourActivity.this" with your actual Activity instance
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+
+// Inflate the dialog layout
+                LayoutInflater inflater = LayoutInflater.from(dialogBuilder.getContext());
+                View dialogView = inflater.inflate(R.layout.popup_create_user, null);
+                dialogBuilder.setView(dialogView);
+
+// Find the views inside the dialog
+                Button createUser = dialogView.findViewById(R.id.createButton);
+                EditText user = dialogView.findViewById(R.id._userName);
+
+
+
+// Create the dialog
+                AlertDialog dialog = dialogBuilder.create();
+
+// Handle Create button click event
+                createUser.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
+
+                        String userName = user.getText().toString().trim();
+
+                        User user = new User(userName);
+                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                // Calculate the next user ID based on the current count of users
+                                int nextUserId = (int) dataSnapshot.getChildrenCount() + 1;
+                                String userId = "user" + nextUserId;
+                                databaseReference.child(userId).setValue(user);
+                                dialog.dismiss();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                // Handle any database error here
+                            }
+                        });
+                    }
+
+                });
+
+// Show the dialog
+                dialog.show();
+
+
+            }
+        });
 
         ly_from.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -184,6 +246,40 @@ public class MainActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_status.setAdapter(adapter);
 
+
+        DatabaseReference userRetrieve = FirebaseDatabase.getInstance().getReference("users");
+
+        userRetrieve.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<String> userNames = new ArrayList<>();
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    User user = snapshot.getValue(User.class);
+
+                    if (user != null) {
+                        String userName = user.getName();
+                        userNames.add(userName);
+                    }
+                }
+
+                String[] userList = userNames.toArray(new String[0]);
+
+                ArrayAdapter<String> userAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, userList);
+                userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                sp_user.setAdapter(userAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle any database error here
+            }
+        });
+
+
+
+
+
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -192,25 +288,39 @@ public class MainActivity extends AppCompatActivity {
                 String datefrom = editTextDateFrom.getText().toString();
                 String dateto = editTextDateTo.getText().toString();
                 String status = sp_status.getSelectedItem().toString();
-                String assignto = editTextAssignTo.getText().toString();
+                String assignto = sp_user.getSelectedItem().toString();
 
                 // Perform save operation with the retrieved values
                 if (!projectName.isEmpty() && !taskName.isEmpty() && !datefrom.isEmpty() &&
                         !dateto.isEmpty() && !status.isEmpty() && !assignto.isEmpty()) {
-                    Project project = new Project(projectName, taskName, datefrom, dateto, status, assignto);
-                    db = FirebaseDatabase.getInstance();
-                    DatabaseReference reference = db.getReference("Project");
+                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Project");
 
-                    String projectId = reference.push().getKey(); // Generate a unique ID for the project
-                    reference.child(projectId).setValue(project).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    reference.orderByChild("nameproject").equalTo(projectName).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            editTextTask.setText("");
-                            editTextDateFrom.setText("");
-                            editTextDateTo.setText("");
-                            sp_status.setSelection(0);
-                            editTextAssignTo.setText("");
-                            Toast.makeText(MainActivity.this, "Successful", Toast.LENGTH_SHORT).show();
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                // A project with the same name already exists
+                                Toast.makeText(MainActivity.this, "Project with the same name already exists", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Project project = new Project(projectName, taskName, datefrom, dateto, status, assignto);
+                                String projectId = reference.push().getKey(); // Generate a unique ID for the project
+                                reference.child(projectId).setValue(project).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        editTextTask.setText("");
+                                        editTextDateFrom.setText("");
+                                        editTextDateTo.setText("");
+                                        sp_status.setSelection(0);
+                                        sp_user.setSelection(0);
+                                        Toast.makeText(MainActivity.this, "Successful", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            // Handle error
                         }
                     });
                 }
@@ -267,11 +377,12 @@ public class MainActivity extends AppCompatActivity {
                     // Exclude the unique ID from being retrieved as the project name
                     if (projectSnapshot.getKey() != null && !projectSnapshot.getKey().isEmpty()) {
                         // Retrieve other properties of the project
+
                         String projectKey = projectSnapshot.getKey();
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()); // Replace 'context' with your actual context
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.putString("projectKey", projectKey);
-                        editor.apply();
+                        CardItem cardItem = new CardItem();
+                        cardItem.setProjectKey(projectKey);
+
+
 
                         String projectName = projectSnapshot.child("nameproject").getValue(String.class);
                         String assignTo = projectSnapshot.child("assignto").getValue(String.class);
@@ -280,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
                         String status = projectSnapshot.child("status").getValue(String.class);
                         String taskName = projectSnapshot.child("taskName").getValue(String.class);
 
-                        CardItem newItem = new CardItem(projectName, taskName, assignTo, dateFrom, dateTo, status);
+                        CardItem newItem = new CardItem(projectKey,projectName, taskName, assignTo, dateFrom, dateTo, status);
 
                         // Add the new item to the cardItems and originalData lists
                         cardItems.add(newItem);
@@ -301,5 +412,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
 }
 

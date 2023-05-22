@@ -135,18 +135,36 @@
         </RelativeLayout>
 
         <!-- Assign To -->
-        <com.google.android.material.textfield.TextInputLayout
+        <RelativeLayout
             android:layout_marginTop="10dp"
+            android:layout_gravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginRight="3dp"
+            android:layout_weight=".28"
+            android:background="@drawable/spinner_background"
+            android:orientation="horizontal">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <Spinner
                 android:id="@+id/editTextAssignTo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Assign To" />
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:layout_marginLeft="5dp"
+                android:spinnerMode="dropdown" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                android:src="@drawable/dropdown" />
+
+        </RelativeLayout>
 
         <!-- Save and Close Buttons -->
         <LinearLayout

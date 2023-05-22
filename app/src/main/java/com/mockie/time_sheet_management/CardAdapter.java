@@ -124,7 +124,7 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
     // Method to delete a card item
     private void deleteCardItem(CardItem cardItem) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Project");
-        Query query = databaseReference.orderByChild("nameproject").equalTo(cardItem.getProjectName());
+        Query query = databaseReference.orderByKey().equalTo(cardItem.getProjectKey());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -134,16 +134,16 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     // Delete operation successful
-                                    Toast.makeText(context, "Card item deleted", Toast.LENGTH_SHORT).show();
-                                    Log.d("DeleteCardItem", "Card item deleted: " + cardItem.getProjectName());
+                                    Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show();
+                                    Log.d("DeleteCardItem", "Task deleted: " + cardItem.getProjectName());
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     // An error occurred while deleting the card item
-                                    Toast.makeText(context, "Failed to delete card item", Toast.LENGTH_SHORT).show();
-                                    Log.e("DeleteCardItem", "Failed to delete card item: " + cardItem.getProjectName(), e);
+                                    Toast.makeText(context, "Failed to delete Task", Toast.LENGTH_SHORT).show();
+                                    Log.e("DeleteCardItem", "Failed to delete Task: " + cardItem.getProjectName(), e);
                                 }
                             });
                 }
@@ -174,7 +174,7 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
             TextView editTextDateFrom = dialogView.findViewById(R.id.editTextDateFrom);
             TextView editTextDateTo = dialogView.findViewById(R.id.editTextDateTo);
             Spinner spinnerStatus = dialogView.findViewById(R.id.spinnerStatus);
-            EditText editTextAssignTo = dialogView.findViewById(R.id.editTextAssignTo);
+            Spinner editTextAssignTo = dialogView.findViewById(R.id.editTextAssignTo);
             Button saveButton = dialogView.findViewById(R.id.save);
             Button closeButton = dialogView.findViewById(R.id.close);
             LinearLayout ly_from = dialogView.findViewById(R.id.lyFrom);
@@ -193,12 +193,44 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
                 }
             });
 
+            DatabaseReference userRetrieve = FirebaseDatabase.getInstance().getReference("users");
+
+            userRetrieve.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    List<String> userNames = new ArrayList<>();
+
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        User user = snapshot.getValue(User.class);
+
+                        if (user != null) {
+                            String userName = user.getName();
+                            userNames.add(userName);
+                        }
+                    }
+
+                    String[] userList = userNames.toArray(new String[0]);
+
+                    ArrayAdapter<String> userAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, userList);
+                    userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    editTextAssignTo.setAdapter(userAdapter);
+                    // Use the userAssign array as needed
+                    // ...
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Handle any database error here
+                }
+            });
+
+
             // Set the initial values for the views
             editTextProject.setText(cardItem.getProjectName());
             editTextTask.setText(cardItem.getTaskName());
             editTextDateFrom.setText(cardItem.getStartDate());
             editTextDateTo.setText(cardItem.getEndDate());
-            editTextAssignTo.setText(cardItem.getAssignee());
+
             String[] statusOptions = {"Closed", "Open", "In Progress"};
             ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, statusOptions);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -214,14 +246,13 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
                     String dateFrom = editTextDateFrom.getText().toString();
                     String dateTo = editTextDateTo.getText().toString();
                     String status = spinnerStatus.getSelectedItem().toString();
-                    String assignTo = editTextAssignTo.getText().toString();
+                    String assignTo = editTextAssignTo.getSelectedItem().toString();
 
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context); // Replace 'context' with your actual context
-                    String storedProjectKey = preferences.getString("projectKey", "");
+
 
 
                     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Project");
-                    Query query = databaseReference.orderByKey().equalTo(storedProjectKey); // Replace uniqueId with the actual unique ID of the project
+                    Query query = databaseReference.orderByKey().equalTo(cardItem.getProjectKey()); // Replace uniqueId with the actual unique ID of the project
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -237,13 +268,13 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
                                 snapshot.getRef().child("status").setValue(status)
                                         .addOnSuccessListener(aVoid -> {
                                             // Edit operation successful
-                                            Toast.makeText(context, "Card item edited", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, "Task Edited", Toast.LENGTH_SHORT).show();
                                             Log.d("EditCardItem", "Card item edited: ");
                                         })
                                         .addOnFailureListener(e -> {
                                             // An error occurred while editing the card item
-                                            Toast.makeText(context, "Failed to edit card item", Toast.LENGTH_SHORT).show();
-                                            Log.e("EditCardItem", "Failed to edit card item: ", e);
+                                            Toast.makeText(context, "Failed to edit Task", Toast.LENGTH_SHORT).show();
+                                            Log.e("EditCardItem", "Failed to edit Task", e);
                                         });
                             }
                             if (!projectFound) {
