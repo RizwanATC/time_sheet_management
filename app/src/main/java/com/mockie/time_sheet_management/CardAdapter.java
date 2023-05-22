@@ -3,6 +3,8 @@ package com.mockie.time_sheet_management;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -214,52 +216,52 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
                     String status = spinnerStatus.getSelectedItem().toString();
                     String assignTo = editTextAssignTo.getText().toString();
 
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context); // Replace 'context' with your actual context
+                    String storedProjectKey = preferences.getString("projectKey", "");
+
+
                     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Project");
-                    Query query = databaseReference.orderByChild("id").equalTo(cardItem.getId());
+                    Query query = databaseReference.orderByKey().equalTo(storedProjectKey); // Replace uniqueId with the actual unique ID of the project
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             boolean projectFound = false;
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                // Check if the project ID matches
-                                if (snapshot.child(databaseReference.getKey()).getValue(String.class).equals(cardItem.getId())) {
-                                    projectFound = true;
-                                    // Update the fields of the card item
-                                    snapshot.getRef().child("nameproject").setValue(projectName);
-                                    snapshot.getRef().child("taskName").setValue(taskName);
-                                    snapshot.getRef().child("assignTo").setValue(assignTo);
-                                    snapshot.getRef().child("dateFrom").setValue(dateFrom);
-                                    snapshot.getRef().child("dateTo").setValue(dateTo);
-                                    snapshot.getRef().child("status").setValue(status)
-                                            .addOnSuccessListener(aVoid -> {
-                                                // Edit operation successful
-                                                Toast.makeText(context, "Card item edited", Toast.LENGTH_SHORT).show();
-                                                Log.d("EditCardItem", "Card item edited: " + cardItem.getProjectName());
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                // An error occurred while editing the card item
-                                                Toast.makeText(context, "Failed to edit card item", Toast.LENGTH_SHORT).show();
-                                                Log.e("EditCardItem", "Failed to edit card item: " + cardItem.getProjectName(), e);
-                                            });
-                                }
+                                projectFound = true;
+                                // Update the fields of the card item
+                                snapshot.getRef().child("nameproject").setValue(projectName);
+                                snapshot.getRef().child("taskName").setValue(taskName);
+                                snapshot.getRef().child("assignto").setValue(assignTo);
+                                snapshot.getRef().child("datefrom").setValue(dateFrom);
+                                snapshot.getRef().child("dateto").setValue(dateTo);
+                                snapshot.getRef().child("status").setValue(status)
+                                        .addOnSuccessListener(aVoid -> {
+                                            // Edit operation successful
+                                            Toast.makeText(context, "Card item edited", Toast.LENGTH_SHORT).show();
+                                            Log.d("EditCardItem", "Card item edited: ");
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            // An error occurred while editing the card item
+                                            Toast.makeText(context, "Failed to edit card item", Toast.LENGTH_SHORT).show();
+                                            Log.e("EditCardItem", "Failed to edit card item: ", e);
+                                        });
                             }
-
                             if (!projectFound) {
-                                // Project not found
+                                // Project not found in the database
                                 Toast.makeText(context, "Project not found", Toast.LENGTH_SHORT).show();
-                                Log.d("EditCardItem", "Project not found: " + cardItem.getProjectName());
                             }
                         }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-                            // Handle any errors that occur
-                            Toast.makeText(context, "Failed to edit card item", Toast.LENGTH_SHORT).show();
-                            Log.e("EditCardItem", "Failed to edit card item: " + cardItem.getProjectName(), databaseError.toException());
+                            // Error occurred while accessing the database
+                            Toast.makeText(context, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e("EditCardItem", "Database error: " + databaseError.getMessage());
                         }
                     });
 
                     dialog.dismiss();
+
                 }
 
             });
