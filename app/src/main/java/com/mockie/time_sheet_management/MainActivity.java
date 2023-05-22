@@ -1,8 +1,10 @@
 package com.mockie.time_sheet_management;
 
 import android.app.DatePickerDialog;
+import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -131,7 +133,8 @@ public class MainActivity extends AppCompatActivity {
         List<CardItem> searchResults = new ArrayList<>();
         for (CardItem cardItem : cardItems) {
             if (cardItem.getProjectName().toLowerCase().contains(searchText.toLowerCase()) ||
-                    cardItem.getTaskName().toLowerCase().contains(searchText.toLowerCase())) {
+                    cardItem.getTaskName().toLowerCase().contains(searchText.toLowerCase()) ||
+                    cardItem.getStatus().toLowerCase().contains(searchText.toLowerCase())) {
                 searchResults.add(cardItem);
             }
         }
@@ -186,15 +189,15 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String projectName = editTextProject.getText().toString();
                 String taskName = editTextTask.getText().toString();
-                String dateFrom = editTextDateFrom.getText().toString();
-                String dateTo = editTextDateTo.getText().toString();
+                String datefrom = editTextDateFrom.getText().toString();
+                String dateto = editTextDateTo.getText().toString();
                 String status = sp_status.getSelectedItem().toString();
-                String assignTo = editTextAssignTo.getText().toString();
+                String assignto = editTextAssignTo.getText().toString();
 
                 // Perform save operation with the retrieved values
-                if (!projectName.isEmpty() && !taskName.isEmpty() && !dateFrom.isEmpty() &&
-                        !dateTo.isEmpty() && !status.isEmpty() && !assignTo.isEmpty()) {
-                    Project project = new Project(projectName, taskName, dateFrom, dateTo, status, assignTo);
+                if (!projectName.isEmpty() && !taskName.isEmpty() && !datefrom.isEmpty() &&
+                        !dateto.isEmpty() && !status.isEmpty() && !assignto.isEmpty()) {
+                    Project project = new Project(projectName, taskName, datefrom, dateto, status, assignto);
                     db = FirebaseDatabase.getInstance();
                     DatabaseReference reference = db.getReference("Project");
 
@@ -264,6 +267,12 @@ public class MainActivity extends AppCompatActivity {
                     // Exclude the unique ID from being retrieved as the project name
                     if (projectSnapshot.getKey() != null && !projectSnapshot.getKey().isEmpty()) {
                         // Retrieve other properties of the project
+                        String projectKey = projectSnapshot.getKey();
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()); // Replace 'context' with your actual context
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putString("projectKey", projectKey);
+                        editor.apply();
+
                         String projectName = projectSnapshot.child("nameproject").getValue(String.class);
                         String assignTo = projectSnapshot.child("assignto").getValue(String.class);
                         String dateFrom = projectSnapshot.child("datefrom").getValue(String.class);
