@@ -7,10 +7,11 @@
     android:padding="10dp"
     >
     <androidx.cardview.widget.CardView
+        android:id="@+id/card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="8dp"
-        android:elevation="10dp"
+        android:elevation="50dp"
         app:cardBackgroundColor="@color/teal_200"
         >
 
@@ -36,6 +37,7 @@
                         android:layout_weight="1"
                         android:orientation="horizontal">
                         <TextView
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:layout_marginRight="10dp"
                             android:layout_width="wrap_content"
@@ -44,6 +46,7 @@
 
                         </TextView>
                         <TextView
+
                             android:id="@+id/_project"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
@@ -55,6 +58,7 @@
                         android:layout_weight="1"
                         android:orientation="horizontal">
                         <TextView
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:layout_marginRight="10dp"
                             android:layout_width="wrap_content"
@@ -77,6 +81,7 @@
                         android:layout_weight="1"
                         android:orientation="horizontal">
                         <TextView
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:layout_marginRight="10dp"
                             android:layout_width="wrap_content"
@@ -98,6 +103,7 @@
                         android:layout_weight="1"
                         android:orientation="horizontal">
                         <TextView
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:layout_marginRight="10dp"
                             android:layout_width="wrap_content"
@@ -119,6 +125,7 @@
                         android:layout_weight="1"
                         android:orientation="horizontal">
                         <TextView
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:layout_marginRight="10dp"
                             android:layout_width="wrap_content"
@@ -139,6 +146,7 @@
                         android:layout_weight="1"
                         android:orientation="horizontal">
                         <TextView
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:layout_marginRight="10dp"
                             android:layout_width="wrap_content"

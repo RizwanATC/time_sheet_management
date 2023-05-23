@@ -1,8 +1,8 @@
 package com.mockie.time_sheet_management;
 
 public class CardItem {
-    private String id; // Unique ID of the card item
-    private String projectKey; // Added projectKey field
+    private String id;
+    private String projectKey;
     private String projectName;
     private String taskName;
     private String assignee;

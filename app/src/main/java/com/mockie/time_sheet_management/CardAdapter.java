@@ -20,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,7 +39,7 @@ import java.util.List;
 public class CardAdapter extends ArrayAdapter<CardItem> {
     private Context context;
     private List<CardItem> cardItems;
-    private List<CardItem> originalData; // Original data before filtering
+    private List<CardItem> originalData;
 
     public CardAdapter(Context context, List<CardItem> cardItems, List<CardItem> originalData) {
         super(context, 0, cardItems);
@@ -48,15 +50,18 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // Inflate the card item layout if necessary
+
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.card_listview_item, parent, false);
         }
 
-        // Get the current card item
+
         final CardItem cardItem = cardItems.get(position);
 
-        // Set the card item data to the views
+
+
+
+
         TextView projectTextView = convertView.findViewById(R.id._project);
         TextView taskNameTextView = convertView.findViewById(R.id._taskName);
         TextView taskAssignTextView = convertView.findViewById(R.id._taskAssign);
@@ -72,6 +77,12 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
         fromTextView.setText(cardItem.getStartDate());
         toTextView.setText(cardItem.getEndDate());
         statusTextView.setText(cardItem.getStatus());
+
+
+
+
+
+
 
         deleteImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,14 +125,14 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
         notifyDataSetChanged();
     }
 
-    // Method to reset adapter data to the original data
+
     public void resetData() {
         cardItems.clear();
         cardItems.addAll(originalData);
         notifyDataSetChanged();
     }
 
-    // Method to delete a card item
+
     private void deleteCardItem(CardItem cardItem) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Project");
         Query query = databaseReference.orderByKey().equalTo(cardItem.getProjectKey());
@@ -158,8 +169,7 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
         });
     }
 
-    // Method to edit a card item
-    // Method to edit a card item
+
 
 
         private void editCardItem(CardItem cardItem) {
@@ -214,8 +224,7 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
                     ArrayAdapter<String> userAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, userList);
                     userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     editTextAssignTo.setAdapter(userAdapter);
-                    // Use the userAssign array as needed
-                    // ...
+
                 }
 
                 @Override
@@ -225,7 +234,7 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
             });
 
 
-            // Set the initial values for the views
+
             editTextProject.setText(cardItem.getProjectName());
             editTextTask.setText(cardItem.getTaskName());
             editTextDateFrom.setText(cardItem.getStartDate());
@@ -300,10 +309,6 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
             closeButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Handle the close operation here
-                    // ...
-
-                    // Dismiss the dialog when the close button is clicked
                     dialog.dismiss();
                 }
             });
@@ -328,7 +333,9 @@ public class CardAdapter extends ArrayAdapter<CardItem> {
                 }, year, month, dayOfMonth);
         datePickerDialog.show();
     }
-    }
 
 
-        // Create an
+}
+
+
+

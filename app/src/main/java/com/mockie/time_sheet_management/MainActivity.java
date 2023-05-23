@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     private CardAdapter cardAdapter;
     private List<CardItem> cardItems;
-    private List<CardItem> originalData; // Store the original data for resetting
+    private List<CardItem> originalData;
 
     private ImageButton buttonCreate;
 
@@ -69,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.listView);
         cardItems = new ArrayList<>();
-        originalData = new ArrayList<>(); // Initialize the original data list
-        cardAdapter = new CardAdapter(this, cardItems, originalData); // Pass the original data list to the adapter
+        originalData = new ArrayList<>();
+        cardAdapter = new CardAdapter(this, cardItems, originalData);
 
         fetchFIreBaseData();
 
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 String searchText = s.toString().trim();
                 if (searchText.isEmpty()) {
-                    // If the search text is empty, reset the data to show the full list
+
                     fetchFIreBaseData();
                 } else {
                     performSearch(searchText);
@@ -184,24 +184,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                // Replace "YourActivity.this" with your actual Activity instance
+
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
-// Inflate the dialog layout
+
                 LayoutInflater inflater = LayoutInflater.from(dialogBuilder.getContext());
                 View dialogView = inflater.inflate(R.layout.popup_create_user, null);
                 dialogBuilder.setView(dialogView);
 
-// Find the views inside the dialog
+
                 Button createUser = dialogView.findViewById(R.id.createButton);
                 EditText user = dialogView.findViewById(R.id._userName);
 
 
 
-// Create the dialog
+
                 AlertDialog dialog = dialogBuilder.create();
 
-// Handle Create button click event
+
                 createUser.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
                         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                // Calculate the next user ID based on the current count of users
+
                                 int nextUserId = (int) dataSnapshot.getChildrenCount() + 1;
                                 String userId = "user" + nextUserId;
                                 databaseReference.child(userId).setValue(user);
